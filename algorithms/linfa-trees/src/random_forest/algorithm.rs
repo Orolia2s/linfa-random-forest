@@ -59,7 +59,7 @@ use std::sync::{Arc, Mutex};
 
 #[cfg_attr(
     feature = "serde",
-    derive(Serialize, Deserialize),
+    derive(serde_crate::Serialize, serde_crate::Deserialize),
     serde(crate = "serde_crate")
 )]
 #[derive(Debug, Clone, PartialEq)]
