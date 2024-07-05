@@ -505,6 +505,20 @@ pub struct DecisionTree<F: Float, L: Label> {
     num_features: usize,
 }
 
+impl<F: Float, L: Label + Default, D: Data<Elem = F>> PredictInplace<ArrayBase<D, Ix1>, L>
+    for DecisionTree<F, L>
+{
+    #[inline]
+    fn predict_inplace<'a>(&'a self, record: &'a ArrayBase<D, Ix1>, target: &mut L) {
+        *target = make_prediction(record, &self.root_node);
+    }
+
+    #[inline]
+    fn default_target(&self, _record: &ArrayBase<D, Ix1>) -> L {
+        Default::default()
+    }
+}
+
 impl<F: Float, L: Label + Default, D: Data<Elem = F>> PredictInplace<ArrayBase<D, Ix2>, Array1<L>>
     for DecisionTree<F, L>
 {
@@ -517,7 +531,7 @@ impl<F: Float, L: Label + Default, D: Data<Elem = F>> PredictInplace<ArrayBase<D
         );
 
         for (row, target) in x.rows().into_iter().zip(y.iter_mut()) {
-            *target = make_prediction(&row, &self.root_node);
+            PredictInplace::predict_inplace(self, &row, target);
         }
     }
 
