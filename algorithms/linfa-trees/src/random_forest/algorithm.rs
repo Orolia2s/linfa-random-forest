@@ -268,21 +268,17 @@ fn most_common<L: std::hash::Hash + Eq>(targets: Array1<L>) -> L {
 }
 
 impl<F: Float, L: Label + Default + Copy + Send + Sync, D: Data<Elem = F> + Send + Sync>
-    PredictInplace<ArrayBase<D, Ix1>, HashMap<L, usize>> for RandomForestClassifier<F, L>
+    PredictInplace<ArrayBase<D, Ix1>, HashMap<L, f32>> for RandomForestClassifier<F, L>
 {
-    fn predict_inplace<'a>(
-        &'a self,
-        record: &'a ArrayBase<D, Ix1>,
-        target: &mut HashMap<L, usize>,
-    ) {
+    fn predict_inplace<'a>(&'a self, record: &'a ArrayBase<D, Ix1>, target: &mut HashMap<L, f32>) {
         for tree in &self.trees {
             let predicted = tree.predict(record);
-            *target.entry(predicted).or_insert(0) += 1;
+            *target.entry(predicted).or_insert(0.0) += 1.0 / self.trees.len() as f32;
         }
     }
 
     #[inline]
-    fn default_target(&self, _record: &ArrayBase<D, Ix1>) -> HashMap<L, usize> {
+    fn default_target(&self, _record: &ArrayBase<D, Ix1>) -> HashMap<L, f32> {
         Default::default()
     }
 }
